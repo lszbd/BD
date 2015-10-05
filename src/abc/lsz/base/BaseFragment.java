@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class BaseFragment extends Fragment implements Runnable , Handler.Callback{
+public abstract class BaseFragment extends Fragment implements Handler.Callback{
 
 	/**
 	 * 该Fragment绑定的Activity

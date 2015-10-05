@@ -2,11 +2,11 @@ package abc.lsz.base;
 
 import abc.lsz.interfaces.FragmentCallback;
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,8 +47,7 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 	public static String TAG;
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public void onAttach(Activity activity) {
+	public final void onAttach(Activity activity) {
 		if (activity instanceof FragmentCallback) {
 			this.activity = activity;
 		} else {
@@ -61,7 +60,7 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+	public final View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 		rootView = initView(inflater, savedInstanceState);
 		initData(savedInstanceState);
 		initListener();
@@ -113,5 +112,15 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 	@Override
 	public boolean handleMessage(Message msg) {
 		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends View> T findView(int id){
+		return this.rootView != null ? (T)this.rootView.findViewById(id) : null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends View> T findView(String tag){
+		return this.rootView != null ? (T)this.rootView.findViewWithTag(tag) : null;
 	}
 }

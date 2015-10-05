@@ -22,8 +22,11 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	 */
 	public static Handler handler;
 	
+	/**
+	 * 当前Activity显示的视图
+	 */
+	public View rootView;
 	
-	protected View rootView;
 	/**
 	 * 当前类TAG(类名)
 	 */
@@ -32,7 +35,7 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);      // 去除标题
 		try {
@@ -50,7 +53,7 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	/**
 	 * 初始化方法
 	 */
-	protected void init() {
+	protected final void init() {
 		handler = new Handler(this);                         // 创建消息处理器
 		TAG     = getClass().getSimpleName();                // 获取当前类名当前类打印日志Tag
 		ActivityManager.addActivity(this);                   // 添加当前类到Activity管理器中
@@ -112,5 +115,15 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	@Override
 	public boolean handleMessage(Message msg) {
 		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends View> T findView(int id){
+		return this.rootView != null ? (T)this.rootView.findViewById(id) : null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends View> T findView(String tag){
+		return this.rootView != null ? (T)this.rootView.findViewWithTag(tag) : null;
 	}
 }

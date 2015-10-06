@@ -9,9 +9,13 @@ import android.os.Handler;
  *
  */
 public class BaseApplication extends Application {
+	
 	private static BaseApplication application;
+	
 	private static int mainTid;
+	
 	private static Handler handler;
+	
 	@Override
 //  在主线程运行的
 	public void onCreate() {

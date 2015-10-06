@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
+import android.view.WindowManager;
 
 /**
  * 图片工具类
@@ -38,10 +42,10 @@ public class BitmapUtil {
 	 * @param dirFile  : 缓存目录
 	 * @param url      : 图片路径
 	 */
-	public static Bitmap getBitmap(File dirFile, String url) {
+	public static Bitmap getBitmap(Activity activity, File dirFile, String url, boolean isRequestNet) {
 		System.out.println("BitmapUtil.getBitmap()");
 		SoftReference<Bitmap> softReference = bitmapCaches.get(MD5.getMessageDigest(url));
-		return softReference != null ? softReference.get() : getLocalBitmap(dirFile, url);
+		return softReference != null ? softReference.get() : getLocalBitmap(activity, dirFile, url, isRequestNet);
 	}
 	
 	/**
@@ -49,7 +53,7 @@ public class BitmapUtil {
 	 * @param dirFile  : 缓存目录
 	 * @param url      : 路径
 	 */
-	public static Bitmap getLocalBitmap(File dirFile, String url) {
+	public static Bitmap getLocalBitmap(Activity activity, File dirFile, String url, boolean isRequestNet) {
 		
 		System.out.println("BitmapUtil.getlocalBitmap()");	
 		
@@ -63,7 +67,6 @@ public class BitmapUtil {
 			    return bitmap;
 			} catch (Exception e) {
 				e.printStackTrace();
-				return getNetBitmap(dirFile, url);
 			}finally {
 				if(is != null)
 					try {
@@ -72,9 +75,8 @@ public class BitmapUtil {
 						e.printStackTrace();
 					}
 			}
-		}else{
-			return getNetBitmap(dirFile, url);
 		}
+		return isRequestNet ? getNetBitmap(activity, dirFile, url) : null;
 	}
 	
 	/**
@@ -82,10 +84,8 @@ public class BitmapUtil {
 	 * @param dirFile  : 缓存目录
 	 * @param url      : 路径
 	 */
-	public static Bitmap getNetBitmap(final File dirFile, final String url){
-		
-		System.out.println("BitmapUtil.getNetBitmap()");
-		
+	public static Bitmap getNetBitmap(Activity activity, final File dirFile, final String url){
+//		System.out.println("BitmapUtil.getNetBitmap()");
 		HttpURLConnection conn = null;
 		try {
 			conn = (HttpURLConnection) new URL(url).openConnection();
@@ -95,7 +95,8 @@ public class BitmapUtil {
 			
 			int responseCode = conn.getResponseCode();
 			if(responseCode == 200) {
-				Bitmap bitmap = BitmapFactory.decodeStream(conn.getInputStream());
+				Bitmap bitmap = activity == null ? BitmapFactory.decodeStream(conn.getInputStream())
+						                         : zoomBitmap(activity, conn.getInputStream());
 			    // 添加到缓存中
 				bitmapCaches.remove(MD5.getMessageDigest(url));     // 删除缓存中原有位图
 			    bitmapCaches.put(MD5.getMessageDigest(url), new SoftReference<Bitmap>(bitmap));
@@ -121,9 +122,101 @@ public class BitmapUtil {
     public static int getBitmapSize(Bitmap bitmap) {
         return bitmap.getRowBytes() * bitmap.getHeight();
     }
-//    
-//    public static Bitmap zoomBitmap(){
-//    	
-//    }
     
+    /**
+     * 回收Bitmap
+     * @param bitmap
+     */
+    public static void recycledBitmap(Bitmap bitmap){
+    	if(!bitmap.isRecycled()){
+    		bitmap.recycle();     // 回收图片所占的内存
+            System.gc();          // 提醒系统及时回收
+    	}
+    }
+    
+    /**
+     * 按照屏幕比例缩放Bitmap
+     * @param activity : Activity
+     * @param is       : 位图字节流
+     * @return         : 返回缩放后的位图
+     */
+    @SuppressWarnings("deprecation")
+	public static Bitmap zoomBitmap(Activity activity, InputStream is){
+    //  1. 获取屏幕的宽高信息
+        WindowManager windowManager = activity.getWindowManager();
+			int width  = windowManager.getDefaultDisplay().getWidth();
+            int height = windowManager.getDefaultDisplay().getHeight();
+//      	System.out.println("屏幕的宽 = " + width + "   高 = " + height);
+
+    //  2.获取图片的宽高
+        Options options = new BitmapFactory.Options();    // 解析位图的附加条件
+            options.inJustDecodeBounds = true;            // 只解析位图的头文件信息(图片的附加信息)
+        BitmapFactory.decodeStream(is, null, options);
+        int bitmapWidth  = options.outWidth;    
+        int bitmapHeight = options.outHeight;
+//      	System.out.println("图片的宽 = " + bitmapWidth + "   高 = " + bitmapHeight);
+
+    //  3.计算图片的缩放比例
+        int dx = bitmapWidth  / width;
+        int dy = bitmapHeight / height;
+
+        int scale = 1;
+        if(dx > dy && dy > 1){
+            scale = dx;
+//          System.out.println("按照水平方向绽放，缩放比例 = " + dx);
+        }
+        if(dy > dx && dx > 1){
+            scale = dy;
+//          System.out.println("按照垂直方法缩放，缩放比例 = " + dy);
+        }
+
+    //  4.返回缩放后的位图给调用者
+        options.inSampleSize = scale;
+        options.inJustDecodeBounds = false;   // 解析全部图片
+        return BitmapFactory.decodeStream(is, null, options);
+
+    }
+    
+    
+    
+    /**
+     * 处理大图片工具方法，避免 OOM
+     * @param imgPath : 图片路径
+     * @return : 返回缩放后的图片
+     */
+    @SuppressWarnings("deprecation")
+	public static Bitmap getCompressionBitmap(Activity activity, String imgPath){
+    //  1. 获取屏幕的宽高信息
+        WindowManager windowManager = activity.getWindowManager();
+			int width  = windowManager.getDefaultDisplay().getWidth();
+            int height = windowManager.getDefaultDisplay().getHeight();
+//      	System.out.println("屏幕的宽 = " + width + "   高 = " + height);
+
+    //  2.获取图片的宽高
+        Options options = new BitmapFactory.Options();    // 解析位图的附加条件
+            options.inJustDecodeBounds = true;            // 只解析位图的头文件信息(图片的附加信息)
+        BitmapFactory.decodeFile(imgPath, options);
+        int bitmapWidth  = options.outWidth;    
+        int bitmapHeight = options.outHeight;
+//      	System.out.println("图片的宽 = " + bitmapWidth + "   高 = " + bitmapHeight);
+
+    //  3.计算图片的缩放比例
+        int dx = bitmapWidth  / width;
+        int dy = bitmapHeight / height;
+
+        int scale = 1;
+        if(dx > dy && dy > 1){
+            scale = dx;
+//          System.out.println("按照水平方向绽放，缩放比例 = " + dx);
+        }
+        if(dy > dx && dx > 1){
+            scale = dy;
+//          System.out.println("按照垂直方法缩放，缩放比例 = " + dy);
+        }
+
+    //  4.返回缩放后的位图给调用者
+        options.inSampleSize = scale;
+        options.inJustDecodeBounds = false;   // 解析全部图片
+        return BitmapFactory.decodeFile(imgPath, options);
+    }
 }

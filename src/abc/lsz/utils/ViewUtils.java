@@ -1,5 +1,6 @@
 package abc.lsz.utils;
 
+import abc.lsz.base.BaseApplication;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -13,6 +14,10 @@ public class ViewUtils {
 			ViewGroup group = (ViewGroup) parent;
 			group.removeView(v);
 		}
+	}
+	
+	public static View inflateView(int layoutId){
+		return View.inflate(BaseApplication.getApplication(), layoutId, null);
 	}
 	
 	@SuppressWarnings("unchecked")

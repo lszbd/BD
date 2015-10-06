@@ -38,15 +38,11 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);      // 去除标题
-		try {
-			init();                                              // 初始化数据
-			rootView = initView(savedInstanceState);             // 初始化视图
-			setContentView(rootView);                            // 设置视图
-			initData(savedInstanceState);                        // 初始化数据
-			initListener();                                      // 初始化监听
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		init();                                              // 初始化数据
+		rootView = initView(savedInstanceState);             // 初始化视图
+		setContentView(rootView);                            // 设置视图
+		initData(savedInstanceState);                        // 初始化数据
+		initListener();                                      // 初始化监听
 	}
 
 	
@@ -119,11 +115,11 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	
 	@SuppressWarnings("unchecked")
 	public <T extends View> T findView(int id){
-		return this.rootView != null ? (T)this.rootView.findViewById(id) : null;
+		return (T) rootView.findViewById(id);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public <T extends View> T findView(String tag){
-		return this.rootView != null ? (T)this.rootView.findViewWithTag(tag) : null;
+		return (T) this.rootView.findViewWithTag(tag);
 	}
 }

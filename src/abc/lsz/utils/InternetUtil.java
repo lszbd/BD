@@ -3,6 +3,7 @@ package abc.lsz.utils;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.Context;
@@ -46,7 +47,7 @@ public class InternetUtil {
         if (nType == ConnectivityManager.TYPE_MOBILE) {
             String extraInfo = networkInfo.getExtraInfo();
             if(!TextUtils.isEmpty(extraInfo)){
-                if (extraInfo.toLowerCase().equals("cmnet")) {
+                if (extraInfo.toLowerCase(Locale.getDefault()).equals("cmnet")) {
                     netType = 0x03;
                 } else {
                     netType = 0x02;

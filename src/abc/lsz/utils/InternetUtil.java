@@ -13,7 +13,10 @@ import android.text.TextUtils;
 /**
  * 网络访问工具类
  * @author BD
- * 注意所需权限  : <uses-permission android:name="android.permission.INTERNET" /> 
+ * <p>
+ * 注意所需权限  :
+ * 	  <uses-permission android:name="android.permission.INTERNET" />
+ * </p> 
  */
 public class InternetUtil {
 	
@@ -105,11 +108,17 @@ public class InternetUtil {
      * @param data  : 数据, Values&Values&Values的格式
      * @return
      */
-    public static String get(String url, String data) {
+    public static String get(String url, Map<String, String> params) {
     	HttpURLConnection conn = null;
     	try {
-    		if(data != null) {
-    			url = new StringBuilder().append(url).append("?").append(data).toString();
+    		if(params != null && params.size() > 0) {
+    			StringBuilder sb = new StringBuilder().append(url).append("?");
+    			for(Map.Entry<String, String> entry : params.entrySet()) {
+    				sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+				}
+    			sb.deleteCharAt(sb.length());   // 删除最后一个字符 &
+    			url = sb.toString();
+    			LogUtil.e("Get", "url = " + url);
     		}
 			conn = (HttpURLConnection) new URL(url).openConnection();
 			conn.setRequestMethod("GET");

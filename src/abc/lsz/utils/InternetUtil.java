@@ -25,10 +25,14 @@ public class InternetUtil {
      * 检测网络是否可用
      * @return
      */
-    public boolean isNetworkConnected(Context context) {
+    public static boolean isNetworkConnected(Context context, String msg) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
-        return ni != null && ni.isConnectedOrConnecting();
+        boolean isNetworkConn = ni != null && ni.isConnectedOrConnecting();
+        if(msg != null && !isNetworkConn) {
+        	ToastUtil.shortToast(context, msg);
+        }
+        return isNetworkConn;
     }
     
     /**
@@ -36,7 +40,7 @@ public class InternetUtil {
      * @param context
      * @return : 0 没有网络, 1 WIFI网络, 2 WAP网络, 3 NET网络
      */
-    public int getNetworkType(Context context) {
+    public static int getNetworkType(Context context) {
         int netType = 0;
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -113,11 +117,16 @@ public class InternetUtil {
     	HttpURLConnection conn = null;
     	try {
     		if(params != null && params.size() > 0) {
-    			StringBuilder sb = new StringBuilder().append(url).append("?");
+    			StringBuilder sb = new StringBuilder().append(url);
+    			if(!url.contains("?")){
+    				sb.append("?");
+    			}else if(!url.endsWith("&")){
+    				sb.append("&");
+    			}
     			for(Map.Entry<String, String> entry : params.entrySet()) {
     				sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
 				}
-    			sb.deleteCharAt(sb.length());   // 删除最后一个字符 &
+    			sb.deleteCharAt(sb.length() -1);   // 删除最后一个字符 &
     			url = sb.toString();
     			LogUtil.e("Get", "url = " + url);
     		}

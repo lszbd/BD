@@ -1,5 +1,6 @@
 package abc.lsz.utils;
 import java.security.MessageDigest;
+import java.util.Random;
 
 
 /**
@@ -32,5 +33,25 @@ public class MD5 {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * 超级加密 MD5
+	 * @param text
+	 * @return
+	 */
+	public static String superEncryption(String text){
+		for (int i = 0; i < 15; i++) {
+			text = getMessageDigest(text);
+		}
+		return text;
+	}
+	
+	/**
+	 * 获取一个 10 ~ 20 区间的随机数
+	 * @return
+	 */
+	public static int getRandom(){
+		return  (new Random().nextInt(10)) + 10;
 	}
 }

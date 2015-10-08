@@ -15,37 +15,37 @@ public class LogUtil {
 	 */
 	public static boolean debugMode = true;
 	
-	private static final String TAG =  "BD";
+	private static final String LOGUTILSTAG =  "BD";
 	
 	
 	public static void i(String msg){
 		if(debugMode){
-			Log.i(TAG, msg);
+			Log.i(LOGUTILSTAG, msg);
 		}
 	}
 	
 	public static void d(String msg){
 		if(debugMode){
+			Log.d(LOGUTILSTAG, msg);
+		}
+	}
+	
+	public static void i(String TAG, String msg){
+		if(debugMode){
+			Log.i(TAG, msg);
+		}
+	}
+	
+	public static void d(String TAG, String msg){
+		if(debugMode){
 			Log.d(TAG, msg);
 		}
 	}
 	
-	public static void i(String tag, String msg){
-		if(debugMode){
-			Log.i(tag, msg);
-		}
-	}
 	
-	public static void d(String tag, String msg){
+	public static void e(String TAG, String msg) {
 		if(debugMode){
-			Log.d(tag, msg);
-		}
-	}
-	
-	
-	public static void e(String tag, String msg) {
-		if(debugMode){
-			Log.e(tag, msg);
+			Log.e(TAG, msg);
 		}
 	}
 	

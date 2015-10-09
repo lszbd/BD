@@ -44,7 +44,7 @@ public class MD5 {
 		for (int i = 0; i < 15; i++) {
 			text = getMessageDigest(text);
 		}
-		return text;
+		return text.substring(0, 16);      // 返回十六个字符
 	}
 	
 	/**

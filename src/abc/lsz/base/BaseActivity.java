@@ -51,7 +51,7 @@ public abstract class BaseActivity extends Activity implements Handler.Callback,
 	 */
 	protected final void init() {
 		handler = new Handler(this);                         // 创建消息处理器
-		TAG     = getClass().getSimpleName();                // 获取当前类名当前类打印日志Tag
+		TAG     = this.getClass().getSimpleName();           // 获取当前类名当前类打印日志Tag
 		ActivityManager.addActivity(this);                   // 添加当前类到Activity管理器中
 	}
 

@@ -55,7 +55,7 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 		}
 		super.onAttach(activity);
 		handler = new Handler(this);
-		TAG     = BaseFragment.class.getSimpleName();
+		TAG     = this.getClass().getSimpleName();
 		
 	}
 

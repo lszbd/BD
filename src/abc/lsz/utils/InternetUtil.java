@@ -70,9 +70,11 @@ public class InternetUtil {
      * @param data   : 数据
      * @param params : 请求头字段
      * @return
+     * @throws RuntimeException 
      */
-    public static String post(String url, String data, Map<String, String> params){
+    public static String post(String url, String data, Map<String, String> params) throws RuntimeException{
     	HttpURLConnection conn = null;
+    	int responseCode = -1;
     	try {
 			conn = (HttpURLConnection) new URL(url).openConnection();
 			conn.setRequestMethod("POST");
@@ -92,18 +94,20 @@ public class InternetUtil {
 			out.flush();
 			out.close();
 			
-			int responseCode = conn.getResponseCode();
+			responseCode = conn.getResponseCode();
 			if(responseCode == 200) {
 				return FileUtil.inputToString(conn.getInputStream(), null);
 			}else{
 				LogUtil.e("Network", "网络访问失败 responseCode = " + responseCode);
+//				throw new RuntimeException("网络访问失败 responseCode = " + responseCode);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new RuntimeException("网络访问失败 responseCode = " + responseCode + " msg = " + e.getMessage());
 		}finally{
 			if(conn != null) conn.disconnect(); 
 		}
-		return null;
+    	return null;
     }
     
     
@@ -115,6 +119,7 @@ public class InternetUtil {
      */
     public static String get(String url, Map<String, String> params) {
     	HttpURLConnection conn = null;
+    	int responseCode = -1;
     	try {
     		if(params != null && params.size() > 0) {
     			StringBuilder sb = new StringBuilder().append(url);
@@ -135,19 +140,19 @@ public class InternetUtil {
 			conn.setConnectTimeout(10000);
 			conn.setReadTimeout(5000);
 			
-			int responseCode = conn.getResponseCode();
+			responseCode = conn.getResponseCode();
 			if(responseCode == 200){
 				return FileUtil.inputToString(conn.getInputStream(), null);
 			}else{
 				LogUtil.e("Network", "网络访问失败 responseCode = " + responseCode);
+//				throw new RuntimeException("网络访问失败 responseCode = " + responseCode);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+//			throw new RuntimeException("网络访问失败 responseCode = " + responseCode + " msg = " + e.getMessage());
 		}finally{
 			if(conn != null) conn.disconnect();
 		}
     	return null;
     }
-    
-    
 }

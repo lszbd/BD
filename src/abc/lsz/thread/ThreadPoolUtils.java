@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ThreadPoolUtils {
 	
-	private static ThreadPoolExecutor threadPoolExecutor = null;
+	private static ThreadPoolExecutor threadPoolExecutor;
 	
 	private ThreadPoolUtils(){  }
 	
@@ -100,13 +100,17 @@ public class ThreadPoolUtils {
 	 * 发送终止命令,不会立即终止线程池，而是要等所有任务缓存队列中的任务都执行完后才终止，但再也不会接受新的任务
 	 */
 	public static void shutdown(){
-		threadPoolExecutor.shutdown();
+		if(threadPoolExecutor != null){
+			threadPoolExecutor.shutdown();
+		}
 	}
 	
 	/**
 	 * 立即终止线程池，并尝试打断正在执行的任务，并且清空任务缓存队列，返回尚未执行的任务
 	 */
 	public static void shutdownNew(){
-		threadPoolExecutor.shutdownNow();
+		if(threadPoolExecutor != null){
+			threadPoolExecutor.shutdownNow();
+		}
 	}
 }

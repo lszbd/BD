@@ -1,7 +1,10 @@
 package abc.lsz.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +16,10 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.text.TextUtils;
 import android.view.WindowManager;
 
 /**
@@ -95,7 +100,7 @@ public class BitmapUtil {
 			
 			int responseCode = conn.getResponseCode();
 			if(responseCode == 200) {
-				Bitmap bitmap = activity == null ? BitmapFactory.decodeStream(conn.getInputStream())
+				Bitmap bitmap = activity == null ? BitmapFactory.decodeStream(conn.getInputStream())   //TODO
 						                         : zoomBitmap(activity, conn.getInputStream());
 			    // 添加到缓存中
 				bitmapCaches.remove(MD5.getMessageDigest(url));     // 删除缓存中原有位图
@@ -124,6 +129,17 @@ public class BitmapUtil {
     }
     
     /**
+     * Bitmap 转输入流
+     * @param bitmap
+     * @return
+     */
+    public static InputStream bitmapToInputStream(Bitmap bitmap) {
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+    	return new ByteArrayInputStream(baos.toByteArray());
+    }
+    
+    /**
      * 回收Bitmap
      * @param bitmap
      */
@@ -133,6 +149,35 @@ public class BitmapUtil {
             System.gc();          // 提醒系统及时回收
     	}
     }
+    
+	/**
+	 * 保存Bitmap图片
+	 * @param bitmap
+	 * @param dir
+	 * @param fileName
+	 * @return 保存文件的绝对路径 
+	 */
+	public static String saveBitmap(Bitmap bitmap, String dir, String fileName) {
+		
+		if(bitmap == null || TextUtils.isEmpty(dir)){
+			throw new NullPointerException("Bitmap 或 dir 不能为空");
+		}
+		File dirFile = new File(dir);
+		if(!dirFile.exists()){
+			dirFile.mkdirs();
+		}
+		File file = new File(dirFile, fileName);
+		
+		FileOutputStream out = null;
+		try {
+			out = new FileOutputStream(file);
+			bitmap.compress(CompressFormat.PNG, 100, out);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return file.getAbsolutePath();
+	}
     
     /**
      * 按照屏幕比例缩放Bitmap
@@ -150,7 +195,7 @@ public class BitmapUtil {
 
     //  2.获取图片的宽高
         Options options = new BitmapFactory.Options();    // 解析位图的附加条件
-            options.inJustDecodeBounds = true;            // 只解析位图的头文件信息(图片的附加信息)
+            	options.inJustDecodeBounds = true;        // 只解析位图的头文件信息(图片的附加信息)
         BitmapFactory.decodeStream(is, null, options);
         int bitmapWidth  = options.outWidth;    
         int bitmapHeight = options.outHeight;
@@ -177,15 +222,15 @@ public class BitmapUtil {
 
     }
     
-    
+   
     
     /**
      * 处理大图片工具方法，避免 OOM
      * @param imgPath : 图片路径
      * @return : 返回缩放后的图片
      */
-    @SuppressWarnings("deprecation")
-	public static Bitmap getCompressionBitmap(Activity activity, String imgPath){
+	@SuppressWarnings("deprecation")
+	public static Bitmap zoomBitmap(Activity activity, String imgPath){
     //  1. 获取屏幕的宽高信息
         WindowManager windowManager = activity.getWindowManager();
 			int width  = windowManager.getDefaultDisplay().getWidth();
@@ -199,7 +244,7 @@ public class BitmapUtil {
         int bitmapWidth  = options.outWidth;    
         int bitmapHeight = options.outHeight;
 //      	System.out.println("图片的宽 = " + bitmapWidth + "   高 = " + bitmapHeight);
-
+        
     //  3.计算图片的缩放比例
         int dx = bitmapWidth  / width;
         int dy = bitmapHeight / height;
@@ -216,6 +261,43 @@ public class BitmapUtil {
 
     //  4.返回缩放后的位图给调用者
         options.inSampleSize = scale;
+        options.inJustDecodeBounds = false;   // 解析全部图片
+        return BitmapFactory.decodeFile(imgPath, options);
+    }
+	
+	   /**
+     * 处理大图片工具方法，避免 OOM
+     * @param imgPath : 图片路径
+     * @return : 返回缩放后的图片
+     */
+	public static Bitmap zoomBitmap(int width, int height, String imgPath){
+
+    //  1.获取图片的宽高
+        Options options = new BitmapFactory.Options();    // 解析位图的附加条件
+                options.inJustDecodeBounds = true;            // 只解析位图的头文件信息(图片的附加信息)
+        BitmapFactory.decodeFile(imgPath, options);
+        int bitmapWidth  = options.outWidth;    
+        int bitmapHeight = options.outHeight;
+//      	System.out.println("图片的宽 = " + bitmapWidth + "   高 = " + bitmapHeight);
+        
+    //  2.计算图片的缩放比例
+        int dx = bitmapWidth  / width;     
+        int dy = bitmapHeight / height;
+
+        // 计算缩放比例   
+        int scale = 1;
+        if(dx > dy && dy > 1){
+            scale = dx;
+//          System.out.println("按照水平方向绽放，缩放比例 = " + dx);
+        }
+        if(dy > dx && dx > 1){
+            scale = dy;
+//          System.out.println("按照垂直方法缩放，缩放比例 = " + dy);
+        }
+        
+        
+    //  3.返回缩放后的位图给调用者
+//        options.inSampleSize = scale;
         options.inJustDecodeBounds = false;   // 解析全部图片
         return BitmapFactory.decodeFile(imgPath, options);
     }

@@ -17,8 +17,15 @@ import java.util.Map;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.text.TextUtils;
 import android.view.WindowManager;
 
@@ -144,7 +151,7 @@ public class BitmapUtil {
      * @param bitmap
      */
     public static void recycledBitmap(Bitmap bitmap){
-    	if(!bitmap.isRecycled()){
+    	if(bitmap != null && !bitmap.isRecycled()){
     		bitmap.recycle();     // 回收图片所占的内存
             System.gc();          // 提醒系统及时回收
     	}
@@ -265,7 +272,7 @@ public class BitmapUtil {
         return BitmapFactory.decodeFile(imgPath, options);
     }
 	
-	   /**
+	/**
      * 处理大图片工具方法，避免 OOM
      * @param imgPath : 图片路径
      * @return : 返回缩放后的图片
@@ -273,7 +280,7 @@ public class BitmapUtil {
 	public static Bitmap zoomBitmap(int width, int height, String imgPath){
 
     //  1.获取图片的宽高
-        Options options = new BitmapFactory.Options();    // 解析位图的附加条件
+        Options options = new BitmapFactory.Options();        // 解析位图的附加条件
                 options.inJustDecodeBounds = true;            // 只解析位图的头文件信息(图片的附加信息)
         BitmapFactory.decodeFile(imgPath, options);
         int bitmapWidth  = options.outWidth;    
@@ -297,8 +304,36 @@ public class BitmapUtil {
         
         
     //  3.返回缩放后的位图给调用者
-//        options.inSampleSize = scale;
+        options.inSampleSize = scale;
         options.inJustDecodeBounds = false;   // 解析全部图片
         return BitmapFactory.decodeFile(imgPath, options);
     }
+	
+	
+	/**
+	 * 绘制圆角图片
+	 * @param bitmap : 位图
+	 * @param pixels : 角弧度
+	 * @return
+	 */
+	public static Bitmap toRoundCorner(Bitmap bitmap, float pixels) {
+//		1. 创建一个可绘制的Bitmap位图
+		Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+//		2. 创建画布
+		Canvas canvas = new Canvas(newBitmap);
+			   canvas.drawARGB(0, 0, 0, 0); // 设置画布为透明
+		
+		Paint paint   = new Paint();        // 创建画笔
+			  paint.setAntiAlias(true);     // 消除锯齿
+			  paint.setColor(0xff424242);   // 设置画笔颜色
+			  
+		Rect rect     = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+		RectF rectF   = new RectF(rect);
+
+		canvas.drawRoundRect(rectF, pixels, pixels, paint);
+		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+		canvas.drawBitmap(bitmap, rect, rect, paint);
+		
+		return newBitmap;
+	}
 }

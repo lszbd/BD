@@ -21,7 +21,7 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 	/**
 	 * Fragment显示视图
 	 */
-	private View rootView;
+	protected View rootView;
 	
 	/**
 	 * 消息处理器
@@ -31,8 +31,7 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 	/**
 	 * Fragment回调接口
 	 */
-	@SuppressWarnings("unused")
-	private FragmentCallback callback;
+	protected FragmentCallback callback;
 	
 	
 	/**

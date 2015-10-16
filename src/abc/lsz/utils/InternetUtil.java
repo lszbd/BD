@@ -77,26 +77,26 @@ public class InternetUtil {
     	int responseCode = -1;
     	try {
 			conn = (HttpURLConnection) new URL(url).openConnection();
-			conn.setRequestMethod("POST");
-			conn.setConnectTimeout(10000);
-			conn.setReadTimeout(5000);
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
-			if(params != null && params.size() > 0){
+			conn.setRequestMethod("POST");   // 设置请求方式
+			conn.setConnectTimeout(10000);   // 设置连接超时时间,超时后抛出异常
+			conn.setReadTimeout(5000);       // 设置读取网络数据超时时间
+			conn.setDoInput(true);           // 设置允许输入、输出
+			conn.setDoOutput(true);          
+			if(params != null && params.size() > 0){    // 解析其它的一些请求参数（可选）
 				for(Map.Entry<String, String> entry : params.entrySet()) {
 					conn.setRequestProperty(entry.getKey(), entry.getValue());
 				}
 			}
-			conn.connect();
+			conn.connect();                  // 开始连接网络 
 			
-			OutputStream out = conn.getOutputStream();
+			OutputStream out = conn.getOutputStream(); // 获取输出流
 			out.write(data.getBytes());
 			out.flush();
 			out.close();
 			
-			responseCode = conn.getResponseCode();
+			responseCode = conn.getResponseCode();     // 判断响应码
 			if(responseCode == 200) {
-				return FileUtil.inputToString(conn.getInputStream(), null);
+				return FileUtil.inputToString(conn.getInputStream(), null);   // 获取服务器返回的数据
 			}else{
 				LogUtil.e("Network", "网络访问失败 responseCode = " + responseCode);
 //				throw new RuntimeException("网络访问失败 responseCode = " + responseCode);

@@ -3,7 +3,6 @@ package abc.lsz.utils;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 import android.widget.PopupWindow;
-import android.widget.LinearLayout.LayoutParams;
 
 /**
  * 弹出窗口工具类
@@ -52,5 +51,16 @@ public class PopupWindowUtil {
 		popupWindow.setOutsideTouchable(true);         // 支持返回键删除
 		popupWindow.showAtLocation(parent, gravity, x, y);
 		return popupWindow;
+	}
+	
+	
+	/**
+	 * 关闭弹出窗口
+	 * @param popupWindow
+	 */
+	public static void dismiss(PopupWindow popupWindow){
+		if(popupWindow != null && popupWindow.isShowing()) {
+			popupWindow.dismiss();
+		}
 	}
 }

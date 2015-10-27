@@ -2,11 +2,11 @@ package abc.lsz.base;
 
 import abc.lsz.interfaces.FragmentCallback;
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +46,7 @@ public abstract class BaseFragment extends Fragment implements Handler.Callback{
 	public static String TAG;
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public final void onAttach(Activity activity) {
 		if (activity instanceof FragmentCallback) {
 			this.activity = activity;

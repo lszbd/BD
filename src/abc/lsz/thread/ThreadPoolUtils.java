@@ -55,7 +55,7 @@ public class ThreadPoolUtils {
 	public static void execute(Runnable runnable){
 		createThreadPool();
 		if(runnable == null){
-			throw new NullPointerException("runnble 不能为空");
+			throw new NullPointerException("Runnble 不能为空");
 		}
 		threadPoolExecutor.execute(runnable);
 	}
